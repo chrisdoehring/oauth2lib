@@ -500,15 +500,11 @@ class AuthorizationProvider(Provider):
         })
 
 
-    def get_token_for_refresh_token(self, client_id, client_secret,
-                  refresh_token,
-                  **params):
+    def get_token_for_refresh_token(self, client_id, refresh_token, **params):
         """Generate access token HTTP response.
 
         :param client_id: Client ID.
         :type client_id: str
-        :param client_secret: Client secret.
-        :type client_secret: str
         :param redirect_uri: Client redirect URI.
         :type redirect_uri: str
         :param code: Authorization code.
@@ -518,6 +514,7 @@ class AuthorizationProvider(Provider):
 
         # Check conditions
         # Return proper error responses on invalid conditions
+        client_secret = params.get('client_secret', '')
         client_app = self.validate_client_secret(client_id, client_secret)
         if not client_app:
             return self._make_json_error_response('invalid_client')
@@ -618,7 +615,6 @@ class AuthorizationProvider(Provider):
 
 
             if grant_type == 'authorization_code':
-
                 # Verify OAuth 2.0 Parameters
                 for x in ['client_id', 'client_secret', 'redirect_uri']:
                     if not data.get(x):
@@ -627,7 +623,7 @@ class AuthorizationProvider(Provider):
 
             if grant_type == 'refresh_token':
                 # Verify OAuth 2.0 Parameters
-                for x in ['client_id', 'client_secret', 'refresh_token']:
+                for x in ['client_id', 'refresh_token']:
                     if not data.get(x):
                         raise TypeError("Missing required OAuth 2.0 POST param: {0}".format(x))
                 return self.get_token_for_refresh_token(**data)
